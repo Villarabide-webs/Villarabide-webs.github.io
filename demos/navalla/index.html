@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Navalla Barbería · Reserva tu cita</title>
+<meta name="description" content="Barbería en Santiago de Compostela. Corte, barba y afeitado clásico. Reserva tu hora online. Proyecto de muestra.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+  :root{--vino:#5b1a20;--vino-2:#74262d;--hueso:#f2ece3;--laton:#b8925a;--negro:#1d1717;--gris:#6d6460;--linea:#ddd3c5}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Archivo,system-ui,sans-serif;font-stretch:100%;font-size:1.03rem;line-height:1.55;color:var(--negro);background:var(--hueso)}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--laton);outline-offset:2px}
+  .wrap{width:min(1120px,100% - 32px);margin-inline:auto}
+  h1,h2{font-stretch:68%;font-weight:850;line-height:.95;letter-spacing:-.01em}
+  h2{font-size:clamp(2.4rem,5.5vw,3.8rem);margin-bottom:.35em}
+  h3{font-size:1.05rem;font-weight:700}
+  .demo-note{background:var(--negro);color:#e8e0d4;font-size:.85rem;text-align:center;padding:6px 16px}
+
+  .hero{background:var(--vino);color:var(--hueso)}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+  .logo{font-stretch:68%;font-weight:900;font-size:1.7rem;text-decoration:none;letter-spacing:.02em}
+  .nav a.tel{text-decoration:none;color:#e9c9a0}
+  .hero-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:40px;align-items:end;padding:40px 0 64px}
+  .hero h1{margin-bottom:22px;font-size:clamp(4.2rem,15vw,11.5rem);text-transform:uppercase;color:var(--hueso);line-height:.82}
+  .hero p{max-width:30ch;font-size:1.15rem;color:#ead9cb;margin-bottom:24px}
+  .poste{width:46px;height:260px;border-radius:23px;overflow:hidden;border:4px solid var(--laton);
+    background:repeating-linear-gradient(135deg,#f2ece3 0 14px,#5b1a20 14px 28px,#f2ece3 28px 42px,#1f3d6b 42px 56px);background-size:100% 112px;animation:gira 3s linear infinite}
+  @keyframes gira{to{background-position:0 112px}}
+  @media (prefers-reduced-motion:reduce){.poste{animation:none}}
+  @media (max-width:700px){.poste{display:none}.hero-in{grid-template-columns:1fr}}
+  .btn{display:inline-block;background:var(--laton);color:var(--negro);font:inherit;font-weight:700;padding:14px 24px;border-radius:4px;text-decoration:none;border:0;cursor:pointer}
+  .btn:hover{background:#cba56d}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  section{padding:80px 0}
+
+  /* Reserva en tres pasos */
+  .reserva{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:start}
+  .paso{margin-bottom:36px}
+  .paso h3{font-size:1.2rem;margin-bottom:14px;display:flex;gap:10px;align-items:center}
+  .paso h3 span{display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--vino);color:#fff;align-items:center;justify-content:center;font-size:.9rem}
+  .servicios{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .opt{position:relative}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt .card{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:14px 16px;border:1.5px solid var(--linea);border-radius:6px;background:#fff;cursor:pointer}
+  .opt .card small{color:var(--gris);grid-column:1}
+  .opt .card b{grid-row:1;grid-column:2}
+  .opt input:checked+.card{border-color:var(--vino);box-shadow:inset 0 0 0 1px var(--vino);background:#fbf4f2}
+  .opt input:focus-visible+.card{outline:3px solid var(--laton);outline-offset:2px}
+  .dias,.horas{display:flex;flex-wrap:wrap;gap:8px}
+  .dias .card{padding:10px 14px;text-align:center;display:block;min-width:76px}
+  .dias .card small{display:block}
+  .horas .card{padding:9px 14px;display:block;font-variant-numeric:tabular-nums}
+  .opt input:disabled+.card{background:transparent;color:#b3aaa2;text-decoration:line-through;cursor:not-allowed;border-style:dashed}
+  @media (max-width:560px){.servicios{grid-template-columns:1fr}}
+
+  .resumen{position:sticky;top:20px;background:var(--negro);color:var(--hueso);border-radius:8px;padding:26px}
+  .resumen h3{font-size:1.3rem;margin-bottom:14px}
+  .resumen dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin-bottom:20px}
+  .resumen dt{color:#a99f96}
+  .resumen dd{text-align:right}
+  .resumen .total{border-top:1px solid #3c3434;padding-top:12px;font-weight:700}
+  .resumen label{display:grid;gap:6px;font-size:.9rem;margin-bottom:12px;color:#d9cfc3}
+  .resumen input{font:inherit;padding:10px 12px;border-radius:4px;border:1px solid #4a4040;background:#2a2222;color:#fff}
+  .resumen .btn{width:100%}
+  .ok{margin-top:14px;background:#2f4a33;padding:12px;border-radius:4px;font-size:.95rem}
+  @media (max-width:880px){.reserva{grid-template-columns:1fr}.resumen{position:static}}
+
+  .equipo{background:#fff;border-top:1px solid var(--linea);border-bottom:1px solid var(--linea)}
+  .equipo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+  .barbero svg{width:100%;height:auto;background:var(--hueso);border-radius:6px;display:block;margin-bottom:12px}
+  .barbero p{color:var(--gris);font-size:.95rem}
+  @media (max-width:760px){.equipo-grid{grid-template-columns:1fr}}
+
+  footer{background:var(--vino);color:#d9bfae;font-size:.88rem;padding:26px 0}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+</style>
+</head>
+<body>
+<div class="demo-note">Proyecto de muestra: Navalla es una barbería ficticia creada para un portfolio.</div>
+<header class="hero">
+  <div class="wrap nav"><a class="logo" href="#">NAVALLA</a><a class="tel" href="tel:+34981000000">981 00 00 00</a></div>
+  <div class="wrap hero-in">
+    <div>
+      <h1>Navalla</h1>
+      <p>Barbería en Santiago desde 2014. Corte, barba y afeitado a navaja, sin esperas.</p>
+      <a class="btn" href="#reserva">Reservar hora</a>
+    </div>
+    <div class="poste" aria-hidden="true"></div>
+  </div>
+</header>
+
+<main>
+<section id="reserva">
+  <div class="wrap">
+    <h2>Reserva en un minuto</h2>
+    <div class="reserva">
+      <form id="f" novalidate>
+        <div class="paso">
+          <h3><span>1</span>Elige el servicio</h3>
+          <div class="servicios" id="servicios"></div>
+        </div>
+        <div class="paso">
+          <h3><span>2</span>Elige el día</h3>
+          <div class="dias" id="dias"></div>
+        </div>
+        <div class="paso">
+          <h3><span>3</span>Elige la hora</h3>
+          <div class="horas" id="horas"></div>
+        </div>
+      </form>
+      <aside class="resumen" aria-live="polite">
+        <h3>Tu cita</h3>
+        <dl>
+          <dt>Servicio</dt><dd id="r-serv">—</dd>
+          <dt>Día</dt><dd id="r-dia">—</dd>
+          <dt>Hora</dt><dd id="r-hora">—</dd>
+          <dt class="total">Total</dt><dd class="total" id="r-precio">—</dd>
+        </dl>
+        <label>Tu nombre<input id="nombre" autocomplete="name"></label>
+        <label>Tu móvil<input id="movil" type="tel" autocomplete="tel"></label>
+        <button class="btn" id="confirmar" disabled>Confirmar cita</button>
+        <p class="ok" id="ok" hidden></p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section class="equipo">
+  <div class="wrap">
+    <h2>El equipo</h2>
+    <div class="equipo-grid">
+      <article class="barbero"><svg viewBox="0 0 200 140" aria-hidden="true"><circle cx="100" cy="62" r="30" fill="#5b1a20"/><path d="M50 140 Q100 90 150 140Z" fill="#5b1a20"/><path d="M80 74 Q100 96 120 74 Q100 84 80 74Z" fill="#1d1717"/></svg><h3>Iago</h3><p>Fundador. Especialista en afeitado clásico con toalla caliente.</p></article>
+      <article class="barbero"><svg viewBox="0 0 200 140" aria-hidden="true"><circle cx="100" cy="62" r="30" fill="#b8925a"/><path d="M50 140 Q100 90 150 140Z" fill="#b8925a"/><path d="M70 50 Q100 20 130 50" fill="none" stroke="#1d1717" stroke-width="8"/></svg><h3>Brais</h3><p>Degradados y cortes modernos. Pregúntale por el skin fade.</p></article>
+      <article class="barbero"><svg viewBox="0 0 200 140" aria-hidden="true"><circle cx="100" cy="62" r="30" fill="#1d1717"/><path d="M50 140 Q100 90 150 140Z" fill="#1d1717"/><circle cx="100" cy="62" r="12" fill="#f2ece3"/></svg><h3>Uxía</h3><p>Corte y color. También cortes infantiles los sábados.</p></article>
+    </div>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>Navalla (barbería ficticia) · Santiago de Compostela</span><span>Web de muestra diseñada por Noel Villarabide</span></div></footer>
+
+<script>
+  const servicios=[
+    {id:'corte',n:'Corte',d:'30 min',p:14},
+    {id:'barba',n:'Arreglo de barba',d:'20 min',p:10},
+    {id:'combo',n:'Corte y barba',d:'45 min',p:22},
+    {id:'navaja',n:'Afeitado a navaja',d:'30 min',p:16}
+  ];
+  const horas=['10:00','10:30','11:00','11:30','12:00','12:30','13:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30'];
+  const sel={};
+  const $=id=>document.getElementById(id);
+  const opt=(name,value,html,disabled=false)=>`<label class="opt"><input type="radio" name="${name}" value="${value}" ${disabled?'disabled':''}><span class="card">${html}</span></label>`;
+
+  $('servicios').innerHTML=servicios.map(s=>opt('serv',s.id,`<span>${s.n}</span><small>${s.d}</small><b>${s.p} €</b>`)).join('');
+
+  // Próximos 6 días laborables (cerrado domingo)
+  const dias=[];const d=new Date();
+  while(dias.length<6){d.setDate(d.getDate()+1);if(d.getDay()!==0)dias.push(new Date(d));}
+  $('dias').innerHTML=dias.map((x,i)=>opt('dia',i,`${x.toLocaleDateString('es-ES',{weekday:'short'})}<small>${x.getDate()} ${x.toLocaleDateString('es-ES',{month:'short'})}</small>`)).join('');
+
+  // Horas ocupadas de ejemplo, distintas cada día
+  function pintarHoras(i){
+    $('horas').innerHTML=horas.map((h,k)=>opt('hora',h,h,(k*7+i*3)%5===0)).join('');
+  }
+  pintarHoras(0);
+
+  function resumen(){
+    const s=servicios.find(x=>x.id===sel.serv);
+    $('r-serv').textContent=s?s.n:'—';
+    $('r-precio').textContent=s?s.p+' €':'—';
+    $('r-dia').textContent=sel.dia!==undefined?dias[sel.dia].toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}):'—';
+    $('r-hora').textContent=sel.hora||'—';
+    $('confirmar').disabled=!(s&&sel.dia!==undefined&&sel.hora);
+  }
+  $('f').addEventListener('change',e=>{
+    const t=e.target;
+    if(t.name==='dia'){sel.dia=+t.value;sel.hora=undefined;pintarHoras(sel.dia);}
+    else sel[t.name]=t.value;
+    resumen();
+  });
+  $('confirmar').addEventListener('click',()=>{
+    $('ok').textContent=`Listo: ${$('r-serv').textContent} el ${$('r-dia').textContent} a las ${sel.hora}. En la web real te llegaría un SMS de confirmación.`;
+    $('ok').hidden=false;
+  });
+</script>
+</body>
+</html>
