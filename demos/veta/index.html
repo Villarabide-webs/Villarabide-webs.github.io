@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Veta Estudio · Muebles a medida</title>
+<meta name="description" content="Ebanistería contemporánea en A Coruña: muebles a medida en madera maciza. Proyecto de muestra.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fondo:#f6f6f3; --tinta:#1d1d1b; --gris:#6b6a66; --linea:#d9d7d0;
+    --madera:#c9a26b; --madera-osc:#8e6a3d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Manrope,system-ui,sans-serif;font-size:1rem;line-height:1.6;color:var(--tinta);background:var(--fondo)}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--tinta);outline-offset:3px}
+  .wrap{width:min(1180px,100% - 32px);margin-inline:auto}
+  h1,h2{font-family:"Instrument Serif",Georgia,serif;font-weight:400;line-height:1.02}
+  h2{font-size:clamp(2.4rem,5vw,3.8rem);margin-bottom:.4em}
+  h3{font-size:1.05rem;font-weight:700}
+  .demo-note{background:var(--tinta);color:#e9e7e1;font-size:.82rem;text-align:center;padding:6px 16px}
+
+  header{border-bottom:1px solid var(--linea)}
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0}
+  .logo{font-family:"Instrument Serif",serif;font-size:1.7rem;text-decoration:none}
+  .nav ul{display:flex;gap:32px;list-style:none;font-size:.95rem}
+  .nav ul a{text-decoration:none;color:var(--gris)}
+  .nav ul a:hover{color:var(--tinta)}
+  @media (max-width:720px){.nav ul{display:none}}
+
+  /* Portada con selector de madera */
+  .hero{display:grid;grid-template-columns:1fr 1.15fr;gap:48px;align-items:center;padding:64px 0 80px}
+  .hero h1{font-size:clamp(3rem,7vw,6rem)}
+  .hero h1 em{font-style:italic;color:var(--madera-osc);transition:color .4s}
+  .hero p{color:var(--gris);font-size:1.1rem;max-width:40ch;margin:20px 0 28px}
+  .selector p.lbl{font-size:.85rem;font-weight:700;margin-bottom:10px}
+  .swatches{display:flex;flex-wrap:wrap;gap:10px}
+  .sw{display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border:1px solid var(--linea);background:#fff;border-radius:999px;font:inherit;font-size:.92rem;cursor:pointer;color:var(--tinta)}
+  .sw span.c{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+  .sw[aria-pressed="true"]{border-color:var(--tinta);box-shadow:0 0 0 1px var(--tinta)}
+  .desc-madera{margin-top:16px;font-size:.95rem;color:var(--gris);min-height:3.2em;max-width:44ch}
+  .escena{background:#ecebe6;border-radius:4px;aspect-ratio:5/4;display:flex;align-items:flex-end;justify-content:center;padding:6% 6% 0;position:relative;overflow:hidden}
+  .escena svg{width:100%;height:auto;display:block}
+  .escena .etiqueta{position:absolute;top:18px;left:20px;font-size:.85rem;color:var(--gris)}
+  #pieza rect,#pieza path{transition:fill .45s ease}
+  @media (max-width:880px){.hero{grid-template-columns:1fr;gap:32px;padding-top:40px}}
+  @media (prefers-reduced-motion:reduce){#pieza rect,#pieza path,.hero h1 em{transition:none}}
+
+  section{padding:88px 0;border-top:1px solid var(--linea)}
+  .piezas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;margin-top:28px}
+  .pieza figure{background:#fff;aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid var(--linea)}
+  .pieza figure svg{width:72%;height:auto}
+  .pieza h3{margin-top:14px}
+  .pieza p{color:var(--gris);font-size:.92rem}
+  @media (max-width:900px){.piezas-grid{grid-template-columns:1fr 1fr}}
+
+  .encargo{display:grid;grid-template-columns:1fr 1.4fr;gap:56px}
+  .encargo ol{list-style:none;counter-reset:p;display:grid;gap:0}
+  .encargo li{counter-increment:p;display:grid;grid-template-columns:56px 1fr;padding:22px 0;border-bottom:1px solid var(--linea)}
+  .encargo li::before{content:counter(p);font-family:"Instrument Serif",serif;font-size:2.2rem;line-height:1;color:var(--madera-osc)}
+  .encargo li p{color:var(--gris);font-size:.95rem;margin-top:4px}
+  @media (max-width:820px){.encargo{grid-template-columns:1fr;gap:24px}}
+
+  .cita{background:var(--tinta);color:#eeece6;border:0}
+  .cita blockquote{font-family:"Instrument Serif",serif;font-size:clamp(1.8rem,4vw,3rem);line-height:1.15;max-width:24ch}
+  .cita p{color:#a9a69e;margin-top:20px}
+
+  .contacto{display:grid;grid-template-columns:1fr 1fr;gap:56px}
+  .contacto .datos{display:grid;gap:4px;margin-top:20px;color:var(--gris)}
+  .contacto .datos strong{color:var(--tinta)}
+  .btn{display:inline-block;background:var(--tinta);color:#fff;text-decoration:none;padding:14px 26px;border-radius:999px;font-weight:700;margin-top:28px}
+  .btn:hover{background:var(--madera-osc)}
+  .horario{border-left:1px solid var(--linea);padding-left:32px}
+  .horario dl{display:grid;grid-template-columns:auto 1fr;gap:10px 24px;margin-top:10px}
+  .horario dt{font-weight:700}
+  .horario dd{color:var(--gris)}
+  @media (max-width:820px){.contacto{grid-template-columns:1fr}.horario{border-left:0;padding-left:0}}
+
+  footer{padding:28px 0;font-size:.85rem;color:var(--gris);border-top:1px solid var(--linea)}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between}
+</style>
+</head>
+<body>
+<div class="demo-note">Proyecto de muestra: Veta Estudio es un negocio ficticio creado para un portfolio.</div>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#">Veta Estudio</a>
+    <ul>
+      <li><a href="#piezas">Piezas</a></li>
+      <li><a href="#encargo">Cómo encargar</a></li>
+      <li><a href="#contacto">Visítanos</a></li>
+    </ul>
+  </div>
+</header>
+
+<main>
+<div class="wrap hero">
+  <div>
+    <h1>Muebles hechos para tu casa, en <em id="nombre-madera">roble</em>.</h1>
+    <p>Diseñamos y fabricamos a mano cada pieza en nuestro taller de A Coruña. Una mesa, una estantería o una cocina entera, pensadas para el sitio donde van a vivir.</p>
+    <div class="selector">
+      <p class="lbl" id="lbl-mad">Prueba con otra madera</p>
+      <div class="swatches" role="group" aria-labelledby="lbl-mad">
+        <button class="sw" data-madera="roble" aria-pressed="true"><span class="c" style="background:#c9a26b"></span>Roble</button>
+        <button class="sw" data-madera="nogal" aria-pressed="false"><span class="c" style="background:#5d3d2a"></span>Nogal</button>
+        <button class="sw" data-madera="fresno" aria-pressed="false"><span class="c" style="background:#e4d4b2"></span>Fresno</button>
+        <button class="sw" data-madera="cerezo" aria-pressed="false"><span class="c" style="background:#a5583a"></span>Cerezo</button>
+      </div>
+      <p class="desc-madera" id="desc" aria-live="polite">Roble europeo: tono miel, veta recta y muy resistente. La opción más versátil.</p>
+    </div>
+  </div>
+  <div class="escena">
+    <span class="etiqueta">Aparador Muros · 180 × 45 × 75 cm</span>
+    <svg viewBox="0 0 500 300" role="img" aria-label="Ilustración de un aparador de madera">
+      <defs>
+        <filter id="veta" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.006 0.12" numOctaves="3" seed="4"/>
+          <feComponentTransfer><feFuncA type="table" tableValues="0 .22 0 .18 0"/></feComponentTransfer>
+          <feColorMatrix type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0"/>
+        </filter>
+        <clipPath id="forma"><rect x="40" y="70" width="420" height="160" rx="3"/><rect x="32" y="60" width="436" height="14" rx="2"/></clipPath>
+      </defs>
+      <g id="pieza">
+        <!-- patas -->
+        <path id="patas" d="M70 228 L62 300 L74 300 L86 228 Z M430 228 L438 300 L426 300 L414 228 Z M130 228 L124 290 L134 290 L144 228 Z M370 228 L376 290 L366 290 L356 228 Z" fill="#8e6a3d"/>
+        <!-- cuerpo -->
+        <rect id="cuerpo" x="40" y="70" width="420" height="160" rx="3" fill="#c9a26b"/>
+        <rect id="tapa" x="32" y="60" width="436" height="14" rx="2" fill="#b58c55"/>
+        <!-- puertas -->
+        <rect class="puerta" x="54" y="84" width="124" height="132" fill="#c9a26b" stroke="rgba(0,0,0,.18)"/>
+        <rect class="puerta" x="188" y="84" width="124" height="132" fill="#c9a26b" stroke="rgba(0,0,0,.18)"/>
+        <rect class="puerta" x="322" y="84" width="124" height="132" fill="#c9a26b" stroke="rgba(0,0,0,.18)"/>
+        <rect x="32" y="60" width="436" height="170" filter="url(#veta)" clip-path="url(#forma)"/>
+        <rect x="170" y="140" width="3" height="22" fill="#2a2a28"/><rect x="198" y="140" width="3" height="22" fill="#2a2a28"/><rect x="438" y="140" width="3" height="22" fill="#2a2a28"/>
+        <!-- objetos -->
+        <rect x="90" y="30" width="26" height="30" rx="4" fill="#e9e7e1" stroke="#cfcdc6"/>
+        <path d="M330 60 Q345 18 360 60 Z" fill="#7c8b6d"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<section id="piezas">
+  <div class="wrap">
+    <h2>Algunas piezas</h2>
+    <p style="color:var(--gris);max-width:52ch">Cada encargo es único, pero estas son las cosas que más nos piden. Todas se pueden hacer en cualquiera de nuestras maderas.</p>
+    <div class="piezas-grid">
+      <article class="pieza">
+        <figure><svg viewBox="0 0 100 70" aria-hidden="true"><rect x="5" y="20" width="90" height="7" fill="#c9a26b"/><rect x="14" y="27" width="5" height="40" fill="#8e6a3d"/><rect x="81" y="27" width="5" height="40" fill="#8e6a3d"/></svg></figure>
+        <h3>Mesa Oleiros</h3><p>Comedor de 6 a 10 personas. Tablero de una sola pieza.</p>
+      </article>
+      <article class="pieza">
+        <figure><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="20" y="5" width="60" height="90" fill="none" stroke="#8e6a3d" stroke-width="4"/><rect x="20" y="30" width="60" height="4" fill="#8e6a3d"/><rect x="20" y="55" width="60" height="4" fill="#8e6a3d"/><rect x="28" y="12" width="8" height="18" fill="#c9a26b"/><rect x="38" y="16" width="6" height="14" fill="#5d3d2a"/><rect x="58" y="40" width="14" height="15" rx="3" fill="#e4d4b2"/></svg></figure>
+        <h3>Estantería Mera</h3><p>Modular, de suelo a techo. Se ajusta al milímetro.</p>
+      </article>
+      <article class="pieza">
+        <figure><svg viewBox="0 0 100 70" aria-hidden="true"><rect x="8" y="10" width="84" height="34" rx="6" fill="#c9a26b"/><rect x="8" y="44" width="84" height="6" fill="#8e6a3d"/><rect x="18" y="50" width="4" height="14" fill="#8e6a3d"/><rect x="78" y="50" width="4" height="14" fill="#8e6a3d"/></svg></figure>
+        <h3>Cabecero Sada</h3><p>Liso o con listones. Con mesillas integradas si quieres.</p>
+      </article>
+      <article class="pieza">
+        <figure><svg viewBox="0 0 100 100" aria-hidden="true"><rect x="30" y="8" width="40" height="44" rx="4" fill="#c9a26b"/><rect x="26" y="52" width="48" height="8" fill="#8e6a3d"/><rect x="30" y="60" width="4" height="34" fill="#8e6a3d"/><rect x="66" y="60" width="4" height="34" fill="#8e6a3d"/></svg></figure>
+        <h3>Silla Arteixo</h3><p>Ensambles sin tornillos. Asiento de madera o enea.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="encargo">
+  <div class="wrap encargo">
+    <div>
+      <h2>Cómo se encarga un mueble</h2>
+      <p style="color:var(--gris)">Desde la primera charla hasta que lo tienes en casa suelen pasar entre 4 y 8 semanas.</p>
+    </div>
+    <ol>
+      <li><div><h3>Nos cuentas la idea</h3><p>En el estudio o por teléfono. Trae medidas, fotos del espacio o lo que tengas.</p></div></li>
+      <li><div><h3>Te enseñamos un boceto</h3><p>Con medidas, madera y acabado. Y el precio cerrado.</p></div></li>
+      <li><div><h3>Lo fabricamos</h3><p>Te mandamos fotos del proceso para que veas cómo avanza.</p></div></li>
+      <li><div><h3>Lo llevamos y montamos</h3><p>Entrega e instalación incluidas en A Coruña y alrededores.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section class="cita">
+  <div class="wrap">
+    <blockquote>Un buen mueble no se nota. Simplemente está ahí, durante treinta años.</blockquote>
+    <p>Lucía Pardo, ebanista y fundadora de Veta Estudio (personaje ficticio)</p>
+  </div>
+</section>
+
+<section id="contacto">
+  <div class="wrap contacto">
+    <div>
+      <h2>Ven a ver la madera</h2>
+      <p style="color:var(--gris);max-width:44ch">En el estudio tenemos muestras de todas las maderas y acabados. Es la mejor forma de decidir.</p>
+      <div class="datos">
+        <strong>Veta Estudio</strong>
+        <span>Rúa ficticia, 12 · 15000 A Coruña</span>
+        <a href="mailto:hola@ejemplo.com">hola@ejemplo.com</a>
+      </div>
+      <a class="btn" href="mailto:hola@ejemplo.com?subject=Quiero%20encargar%20un%20mueble">Escribir al estudio</a>
+    </div>
+    <div class="horario">
+      <h3>Horario del estudio</h3>
+      <dl>
+        <dt>Lunes a viernes</dt><dd>10:00–14:00 y 17:00–20:00</dd>
+        <dt>Sábados</dt><dd>Con cita previa</dd>
+        <dt>Domingos</dt><dd>Cerrado</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Veta Estudio (negocio ficticio)</span>
+    <span>Web de muestra diseñada por Noel Villarabide</span>
+  </div>
+</footer>
+
+<script>
+  const maderas = {
+    roble:  {base:'#c9a26b', tapa:'#b58c55', osc:'#8e6a3d', texto:'#8e6a3d', desc:'Roble europeo: tono miel, veta recta y muy resistente. La opción más versátil.'},
+    nogal:  {base:'#6b4631', tapa:'#5d3d2a', osc:'#3e281c', texto:'#5d3d2a', desc:'Nogal: oscuro y elegante, con vetas onduladas. Ideal para piezas protagonistas.'},
+    fresno: {base:'#e4d4b2', tapa:'#d6c39c', osc:'#a88f62', texto:'#9a8256', desc:'Fresno: muy claro y luminoso. Perfecto para espacios pequeños o con poca luz.'},
+    cerezo: {base:'#b0613f', tapa:'#9c5336', osc:'#6e3823', texto:'#9c5336', desc:'Cerezo: rojizo y cálido. Con los años se oscurece y gana carácter.'}
+  };
+  const botones = document.querySelectorAll('.sw');
+  botones.forEach(b => b.addEventListener('click', () => {
+    const m = maderas[b.dataset.madera];
+    botones.forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.getElementById('cuerpo').setAttribute('fill', m.base);
+    document.querySelectorAll('.puerta').forEach(p => p.setAttribute('fill', m.base));
+    document.getElementById('tapa').setAttribute('fill', m.tapa);
+    document.getElementById('patas').setAttribute('fill', m.osc);
+    const nombre = document.getElementById('nombre-madera');
+    nombre.textContent = b.dataset.madera;
+    nombre.style.color = m.texto;
+    document.getElementById('desc').textContent = m.desc;
+  }));
+</script>
+</body>
+</html>
