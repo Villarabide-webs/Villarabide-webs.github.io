@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marea Fisioterapia · Oleiros</title>
+<meta name="description" content="Clínica de fisioterapia en Oleiros: espalda, deportiva, suelo pélvico y rehabilitación. Pide cita. Proyecto de muestra.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{--teal:#1e4f52;--teal-2:#2c6a6d;--menta:#d6ebe6;--blanco:#fcfcfa;--ambar:#f2a541;--tinta:#16302f;--gris:#5a6d6c;--linea:#d3e1de}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Outfit,system-ui,sans-serif;font-size:1.06rem;line-height:1.6;color:var(--tinta);background:var(--blanco)}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--ambar);outline-offset:2px}
+  .wrap{width:min(1120px,100% - 32px);margin-inline:auto}
+  h1,h2{font-weight:300;line-height:1.05;letter-spacing:-.02em}
+  h2{font-size:clamp(2.2rem,4.8vw,3.4rem);margin-bottom:.4em}
+  h3{font-weight:500;font-size:1.2rem}
+  .demo-note{background:var(--teal);color:#e2f0ec;font-size:.85rem;text-align:center;padding:6px 16px}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+  .logo{font-weight:700;font-size:1.35rem;text-decoration:none;color:var(--teal)}
+  .logo span{font-weight:300}
+  .btn{display:inline-block;background:var(--teal);color:#fff;font:inherit;font-weight:500;padding:13px 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+  .btn:hover{background:var(--teal-2)}
+  .btn-amb{background:var(--ambar);color:var(--tinta)}
+  .btn-amb:hover{background:#f5b462}
+
+  .hero{background:var(--menta);border-radius:28px;margin:0 16px;padding:64px 0}
+  .hero h1{font-size:clamp(2.8rem,6.5vw,5.2rem);max-width:15ch}
+  .hero h1 b{font-weight:500}
+  .hero p{max-width:44ch;color:var(--gris);font-size:1.15rem;margin:20px 0 28px}
+  .datos{display:flex;flex-wrap:wrap;gap:28px;margin-top:40px;color:var(--teal)}
+  .datos div{font-size:.95rem}
+  .datos strong{display:block;font-size:1.6rem;font-weight:500}
+
+  section{padding:84px 0}
+
+  /* Mapa del cuerpo: lo memorable */
+  .mapa{display:grid;grid-template-columns:minmax(220px,340px) 1fr;gap:56px;align-items:center}
+  .cuerpo{position:relative}
+  .cuerpo svg{width:100%;height:auto;display:block}
+  .zona{position:absolute;width:30px;height:30px;border-radius:50%;border:3px solid #fff;background:var(--ambar);cursor:pointer;transform:translate(-50%,-50%);box-shadow:0 0 0 0 rgba(242,165,65,.6);transition:transform .15s}
+  .zona:hover{transform:translate(-50%,-50%) scale(1.15)}
+  .zona[aria-pressed="true"]{background:var(--teal);box-shadow:0 0 0 8px rgba(30,79,82,.18)}
+  .info{background:#fff;border:1px solid var(--linea);border-radius:20px;padding:32px;min-height:300px}
+  .info .etq{color:var(--teal-2);font-weight:500;margin-bottom:6px}
+  .info h3{font-size:1.8rem;font-weight:400;margin-bottom:12px}
+  .info ul{padding-left:1.1em;color:var(--gris);display:grid;gap:4px;margin:12px 0 20px}
+  .info .sesiones{background:var(--menta);border-radius:12px;padding:12px 16px;font-size:.98rem}
+  @media (max-width:820px){.mapa{grid-template-columns:1fr;gap:28px}.cuerpo{max-width:280px;margin-inline:auto}}
+
+  .tarifas{background:var(--teal);color:#e6f2ef;border-radius:28px;margin:0 16px}
+  .tarifas h2{color:#fff}
+  .tabla{width:100%;border-collapse:collapse;margin-top:16px}
+  .tabla th,.tabla td{text-align:left;padding:16px 8px;border-bottom:1px solid rgba(255,255,255,.18)}
+  .tabla th{font-weight:400;color:#a9cbc5;font-size:.92rem}
+  .tabla td:last-child,.tabla th:last-child{text-align:right;white-space:nowrap}
+  .tabla td:first-child{font-weight:500;color:#fff}
+  .tarifas small{display:block;margin-top:18px;color:#a9cbc5}
+
+  .cita{display:grid;grid-template-columns:1fr 1.1fr;gap:56px}
+  form{display:grid;gap:14px;background:#fff;border:1px solid var(--linea);border-radius:20px;padding:28px}
+  label{display:grid;gap:6px;font-size:.92rem;font-weight:500}
+  input,select,textarea{font:inherit;font-weight:400;padding:11px 14px;border:1.5px solid var(--linea);border-radius:12px;background:var(--blanco);color:var(--tinta)}
+  textarea{min-height:90px;resize:vertical}
+  .ok{background:var(--menta);padding:12px 14px;border-radius:12px;font-size:.95rem}
+  @media (max-width:820px){.cita{grid-template-columns:1fr;gap:24px}}
+
+  footer{padding:28px 0;color:var(--gris);font-size:.88rem;border-top:1px solid var(--linea)}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+</style>
+</head>
+<body>
+<div class="demo-note">Proyecto de muestra: Marea Fisioterapia es una clínica ficticia creada para un portfolio.</div>
+<header class="wrap nav">
+  <a class="logo" href="#">Marea <span>fisioterapia</span></a>
+  <a class="btn" href="#cita">Pedir cita</a>
+</header>
+
+<main>
+<div class="hero">
+  <div class="wrap">
+    <h1>Vuelve a moverte <b>sin dolor</b></h1>
+    <p>Fisioterapia en Oleiros con sesiones de una hora, siempre con el mismo fisio. Te explicamos qué te pasa y te enseñamos ejercicios para casa.</p>
+    <a class="btn btn-amb" href="#zonas">¿Dónde te duele?</a>
+    <div class="datos">
+      <div><strong>60 min</strong>por sesión, sin máquinas de relleno</div>
+      <div><strong>4 fisios</strong>colegiados</div>
+      <div><strong>Parking</strong>gratuito en la puerta</div>
+    </div>
+  </div>
+</div>
+
+<section id="zonas">
+  <div class="wrap">
+    <h2>¿Dónde te duele?</h2>
+    <p style="color:var(--gris);max-width:52ch;margin-bottom:36px">Toca una zona para ver qué tratamos y cuántas sesiones suelen hacer falta.</p>
+    <div class="mapa">
+      <div class="cuerpo">
+        <svg viewBox="0 0 200 420" aria-hidden="true">
+          <g fill="#d6ebe6" stroke="#9cc3bb" stroke-width="2" stroke-linejoin="round">
+            <circle cx="100" cy="40" r="26"/>
+            <rect x="90" y="62" width="20" height="18" rx="6"/>
+            <path d="M58 82 Q100 72 142 82 L136 204 Q100 214 64 204 Z"/>
+            <path d="M58 86 L34 192 Q38 200 46 196 L70 112 Z"/>
+            <path d="M142 86 L166 192 Q162 200 154 196 L130 112 Z"/>
+            <rect x="66" y="200" width="31" height="206" rx="14"/>
+            <rect x="103" y="200" width="31" height="206" rx="14"/>
+          </g>
+        </svg>
+        <button class="zona" style="left:50%;top:17%" data-zona="cuello" aria-label="Cuello" aria-pressed="false"></button>
+        <button class="zona" style="left:31%;top:21%" data-zona="hombro" aria-label="Hombro" aria-pressed="false"></button>
+        <button class="zona" style="left:50%;top:42%" data-zona="lumbar" aria-label="Zona lumbar" aria-pressed="true"></button>
+        <button class="zona" style="left:59.5%;top:71%" data-zona="rodilla" aria-label="Rodilla" aria-pressed="false"></button>
+        <button class="zona" style="left:40.5%;top:92%" data-zona="tobillo" aria-label="Tobillo" aria-pressed="false"></button>
+      </div>
+      <div class="info" aria-live="polite">
+        <p class="etq" id="i-etq"></p>
+        <h3 id="i-tit"></h3>
+        <p id="i-txt" style="color:var(--gris)"></p>
+        <ul id="i-lista"></ul>
+        <p class="sesiones" id="i-ses"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="tarifas">
+  <div class="wrap">
+    <h2>Tarifas</h2>
+    <table class="tabla">
+      <thead><tr><th>Sesión</th><th>Duración</th><th>Precio</th></tr></thead>
+      <tbody>
+        <tr><td>Primera visita y valoración</td><td>60 min</td><td>45 €</td></tr>
+        <tr><td>Sesión de fisioterapia</td><td>60 min</td><td>40 €</td></tr>
+        <tr><td>Bono de 5 sesiones</td><td>5 × 60 min</td><td>180 €</td></tr>
+        <tr><td>Suelo pélvico</td><td>60 min</td><td>50 €</td></tr>
+      </tbody>
+    </table>
+    <small>Trabajamos con las principales mutuas deportivas. Pregúntanos por la tuya.</small>
+  </div>
+</section>
+
+<section id="cita">
+  <div class="wrap cita">
+    <div>
+      <h2>Pide tu cita</h2>
+      <p style="color:var(--gris);max-width:40ch">Te llamamos el mismo día para darte hora. Si es urgente, llama al 981 00 00 00.</p>
+      <p style="margin-top:20px">Avenida ficticia, 22 · 15172 Oleiros<br>De lunes a viernes, de 9:00 a 21:00</p>
+    </div>
+    <form id="f" novalidate>
+      <label>Nombre<input name="nombre" autocomplete="name"></label>
+      <label>Teléfono<input name="tel" type="tel" autocomplete="tel"></label>
+      <label>¿Qué te pasa?<select name="zona" id="sel-zona"><option value="cuello">Cuello</option><option value="hombro">Hombro</option><option value="lumbar" selected>Espalda o zona lumbar</option><option value="rodilla">Rodilla</option><option value="tobillo">Tobillo</option><option value="otro">Otra cosa</option></select></label>
+      <label>Cuéntanos un poco (opcional)<textarea name="msg"></textarea></label>
+      <button class="btn" type="submit">Enviar solicitud</button>
+      <p class="ok" id="ok" role="status" hidden>Esto es una demo: en la web real, la clínica recibiría tu solicitud y te llamaría.</p>
+    </form>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>Marea Fisioterapia (clínica ficticia)</span><span>Web de muestra diseñada por Noel Villarabide</span></div></footer>
+
+<script>
+  const zonas={
+    cuello:{etq:'Cuello y cervicales',tit:'Dolor de cuello',txt:'Muy habitual si pasas muchas horas con el ordenador o el móvil.',lista:['Contracturas y tortícolis','Dolor de cabeza de origen cervical','Mareos por tensión cervical'],ses:'Suelen bastar 3 o 4 sesiones, más ejercicios para casa.'},
+    hombro:{etq:'Hombro',tit:'Dolor de hombro',txt:'Del gimnasio, del pádel o de cargar peso con mala postura.',lista:['Tendinitis del manguito rotador','Hombro congelado','Recuperación tras luxación'],ses:'Entre 5 y 10 sesiones, según la lesión.'},
+    lumbar:{etq:'Espalda baja',tit:'Lumbalgia y ciática',txt:'La consulta más frecuente. Casi siempre mejora con tratamiento y movimiento.',lista:['Lumbalgia aguda y crónica','Ciática y hernia discal','Dolor tras el embarazo'],ses:'Notarás mejoría en 2 o 3 sesiones. Lo habitual es hacer entre 4 y 6.'},
+    rodilla:{etq:'Rodilla',tit:'Dolor de rodilla',txt:'Lesiones deportivas, desgaste o recuperación después de una operación.',lista:['Rotura de ligamentos y menisco','Tendinitis rotuliana','Rehabilitación tras prótesis'],ses:'Una rehabilitación postquirúrgica puede llevar de 10 a 20 sesiones.'},
+    tobillo:{etq:'Tobillo y pie',tit:'Esguinces y pie',txt:'Un esguince mal curado vuelve a repetirse. Mejor tratarlo bien a la primera.',lista:['Esguince de tobillo','Fascitis plantar','Tendinitis de Aquiles'],ses:'Entre 3 y 6 sesiones, con ejercicios de equilibrio.'}
+  };
+  const $=id=>document.getElementById(id);
+  function mostrar(z){
+    const d=zonas[z];
+    $('i-etq').textContent=d.etq;$('i-tit').textContent=d.tit;$('i-txt').textContent=d.txt;
+    $('i-lista').innerHTML=d.lista.map(x=>`<li>${x}</li>`).join('');$('i-ses').textContent=d.ses;
+    document.querySelectorAll('.zona').forEach(b=>b.setAttribute('aria-pressed',b.dataset.zona===z));
+    $('sel-zona').value=z;
+  }
+  document.querySelectorAll('.zona').forEach(b=>b.addEventListener('click',()=>mostrar(b.dataset.zona)));
+  mostrar('lumbar');
+  $('f').addEventListener('submit',e=>{e.preventDefault();$('ok').hidden=false;});
+</script>
+</body>
+</html>
