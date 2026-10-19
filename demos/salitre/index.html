@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salitre · Taberna de mar en A Coruña</title>
+<meta name="description" content="Pescado de la lonja, raciones y vinos gallegos en la Ciudad Vieja. Reserva tu mesa online. Proyecto de muestra.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--mar:#12304a;--mar-2:#1c4566;--espuma:#eef3f4;--plata:#9fb3bf;--limon:#e9c53a;--tinta:#10202e;--gris:#55626b}
+  *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}
+  body{font-family:"Work Sans",system-ui,sans-serif;font-size:1.03rem;line-height:1.6;color:var(--tinta);background:var(--espuma)}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--limon);outline-offset:2px}
+  .wrap{width:min(1120px,100% - 32px);margin-inline:auto}
+  h1,h2{font-family:"DM Serif Display",Georgia,serif;font-weight:400;line-height:1.02}
+  h2{font-size:clamp(2.2rem,5vw,3.4rem);margin-bottom:.4em}
+  h3{font-size:1.1rem;font-weight:600}
+  .demo-note{background:var(--limon);color:var(--tinta);font-size:.85rem;text-align:center;padding:6px 16px;font-weight:500}
+
+  .hero{background:var(--mar);color:var(--espuma);position:relative;overflow:hidden}
+  .hero .olas{position:absolute;inset:auto 0 0 0;height:120px;width:100%}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0}
+  .logo{font-family:"DM Serif Display",serif;font-size:1.8rem;text-decoration:none}
+  .nav ul{display:flex;gap:28px;list-style:none}
+  .nav ul a{text-decoration:none;color:var(--plata)}
+  .nav ul a:hover{color:#fff}
+  @media (max-width:700px){.nav ul{display:none}}
+  .hero-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:48px;align-items:center;padding:56px 0 170px;position:relative;z-index:1}
+  .hero h1{font-size:clamp(3.2rem,8vw,6.4rem)}
+  .hero p{color:#c6d4dc;font-size:1.15rem;max-width:38ch;margin:18px 0 28px}
+  .btn{display:inline-block;background:var(--limon);color:var(--tinta);font:inherit;font-weight:600;padding:14px 24px;border-radius:999px;text-decoration:none;border:0;cursor:pointer}
+  .btn:hover{background:#f3d65e}
+  .btn-sec{background:transparent;color:var(--espuma);border:1.5px solid var(--plata);margin-left:8px}
+  .btn-sec:hover{background:rgba(255,255,255,.08)}
+  /* pizarra del día */
+  .pizarra{background:#1f2a2c;border:10px solid #6b4a2f;border-radius:4px;padding:26px 26px 22px;color:#f0f0ea;transform:rotate(1.5deg);box-shadow:0 20px 40px -18px rgba(0,0,0,.6)}
+  .pizarra h2{font-size:1.9rem;margin-bottom:12px;color:#fff}
+  .pizarra ul{list-style:none;display:grid;gap:10px}
+  .pizarra li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed rgba(255,255,255,.25);padding-bottom:8px}
+  .pizarra li span:last-child{color:var(--limon);white-space:nowrap}
+  .pizarra small{display:block;margin-top:12px;color:#aab}
+  @media (max-width:860px){.hero-grid{grid-template-columns:1fr;padding-bottom:150px}.pizarra{transform:none}}
+
+  section{padding:84px 0}
+  /* carta con pestañas */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 28px}
+  .tabs button{font:inherit;font-weight:500;padding:10px 18px;border-radius:999px;border:1.5px solid var(--mar);background:transparent;color:var(--mar);cursor:pointer}
+  .tabs button[aria-selected="true"]{background:var(--mar);color:#fff}
+  .platos{display:grid;grid-template-columns:1fr 1fr;gap:4px 56px}
+  .plato{display:grid;grid-template-columns:1fr auto;gap:2px 16px;padding:16px 0;border-bottom:1px solid #cfdadf}
+  .plato p{grid-column:1;color:var(--gris);font-size:.95rem}
+  .plato .precio{grid-row:1;grid-column:2;font-weight:600}
+  @media (max-width:760px){.platos{grid-template-columns:1fr}}
+  .alergenos{margin-top:22px;font-size:.92rem;color:var(--gris)}
+
+  .reserva{background:#fff}
+  .reserva .wrap{display:grid;grid-template-columns:1fr 1.2fr;gap:56px}
+  form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  form .full{grid-column:1/-1}
+  label{display:grid;gap:6px;font-size:.9rem;font-weight:600}
+  input,select{font:inherit;font-weight:400;padding:11px 12px;border:1.5px solid #c3cfd5;border-radius:8px;background:var(--espuma);color:var(--tinta)}
+  .ok{grid-column:1/-1;background:#e5f1e8;border-left:4px solid #3c8a55;padding:12px 14px;font-size:.95rem}
+  .horario dl{display:grid;grid-template-columns:auto 1fr;gap:8px 24px;margin-top:16px}
+  .horario dt{font-weight:600}
+  .horario dd{color:var(--gris)}
+  @media (max-width:820px){.reserva .wrap{grid-template-columns:1fr}form{grid-template-columns:1fr}}
+
+  footer{background:var(--mar);color:var(--plata);font-size:.88rem;padding:26px 0}
+  footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+</style>
+</head>
+<body>
+<div class="demo-note">Proyecto de muestra: Salitre es un restaurante ficticio creado para un portfolio.</div>
+<header class="hero">
+  <div class="wrap nav">
+    <a class="logo" href="#">Salitre</a>
+    <ul><li><a href="#carta">Carta</a></li><li><a href="#reservar">Reservar</a></li><li><a href="#reservar">Horario</a></li></ul>
+  </div>
+  <div class="wrap hero-grid">
+    <div>
+      <h1>Lo que trae la lonja, a la mesa</h1>
+      <p>Taberna de mar en la Ciudad Vieja de A Coruña. Pescado del día, raciones para compartir y vinos de las cinco denominaciones gallegas.</p>
+      <a class="btn" href="#reservar">Reservar mesa</a><a class="btn btn-sec" href="#carta">Ver la carta</a>
+    </div>
+    <aside class="pizarra" aria-labelledby="hoy">
+      <h2 id="hoy">Hoy fuera de carta</h2>
+      <ul>
+        <li><span>Rodaballo a la brasa</span><span>24 €</span></li>
+        <li><span>Navajas a la plancha</span><span>16 €</span></li>
+        <li><span>Xouvas fritas</span><span>9 €</span></li>
+        <li><span>Tarta de queso de Arzúa</span><span>6 €</span></li>
+      </ul>
+      <small>Cambia cada mañana según lo que haya en la lonja.</small>
+    </aside>
+  </div>
+  <svg class="olas" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 60 C120 20 240 20 360 60 S600 100 720 60 960 20 1080 60 1320 100 1440 60 V120 H0Z" fill="#1c4566"/>
+    <path d="M0 85 C120 50 240 50 360 85 S600 120 720 85 960 50 1080 85 1320 120 1440 85 V120 H0Z" fill="#eef3f4"/>
+  </svg>
+</header>
+
+<main>
+<section id="carta">
+  <div class="wrap">
+    <h2>La carta</h2>
+    <div class="tabs" role="tablist" aria-label="Secciones de la carta">
+      <button role="tab" aria-selected="true" aria-controls="p-raciones" id="t-raciones">Raciones</button>
+      <button role="tab" aria-selected="false" aria-controls="p-pescados" id="t-pescados" tabindex="-1">Pescados</button>
+      <button role="tab" aria-selected="false" aria-controls="p-postres" id="t-postres" tabindex="-1">Postres</button>
+    </div>
+    <div class="platos" role="tabpanel" id="p-raciones" aria-labelledby="t-raciones">
+      <div class="plato"><h3>Pulpo á feira</h3><span class="precio">17 €</span><p>Con cachelos, pimentón de la Vera y aceite de oliva.</p></div>
+      <div class="plato"><h3>Zamburiñas al horno</h3><span class="precio">14 €</span><p>Media docena, con ajada suave.</p></div>
+      <div class="plato"><h3>Croquetas de chipirón</h3><span class="precio">10 €</span><p>En su tinta. Ocho unidades.</p></div>
+      <div class="plato"><h3>Pimientos de Padrón</h3><span class="precio">7 €</span><p>Unos pican y otros no.</p></div>
+      <div class="plato"><h3>Empanada de berberechos</h3><span class="precio">8 €</span><p>Masa de maíz, hecha en casa.</p></div>
+      <div class="plato"><h3>Mejillones al vapor</h3><span class="precio">9 €</span><p>De batea de la ría de Arousa.</p></div>
+    </div>
+    <div class="platos" role="tabpanel" id="p-pescados" aria-labelledby="t-pescados" hidden>
+      <div class="plato"><h3>Merluza de pincho a la gallega</h3><span class="precio">22 €</span><p>Con patata, cebolla y ajada.</p></div>
+      <div class="plato"><h3>Lubina salvaje</h3><span class="precio">26 €</span><p>A la sal o a la brasa. Para dos personas: 48 €.</p></div>
+      <div class="plato"><h3>Bacalao confitado</h3><span class="precio">20 €</span><p>Sobre pisto de verduras de temporada.</p></div>
+      <div class="plato"><h3>Arroz caldoso de bogavante</h3><span class="precio">32 €</span><p>Mínimo dos personas. Precio por persona.</p></div>
+    </div>
+    <div class="platos" role="tabpanel" id="p-postres" aria-labelledby="t-postres" hidden>
+      <div class="plato"><h3>Filloas con crema</h3><span class="precio">6 €</span><p>Receta de la abuela de la casa.</p></div>
+      <div class="plato"><h3>Tarta de Santiago</h3><span class="precio">5 €</span><p>Con un chupito de licor café.</p></div>
+      <div class="plato"><h3>Queixo con membrillo</h3><span class="precio">6 €</span><p>Tetilla y San Simón.</p></div>
+    </div>
+    <p class="alergenos">¿Tienes alguna alergia? Pregúntanos: tenemos la información de alérgenos de cada plato.</p>
+  </div>
+</section>
+
+<section class="reserva" id="reservar">
+  <div class="wrap">
+    <div class="horario">
+      <h2>Reserva tu mesa</h2>
+      <p style="color:var(--gris)">Para grupos de más de 8 personas, llámanos al 981 00 00 00.</p>
+      <dl>
+        <dt>Martes a sábado</dt><dd>13:00–16:00 y 20:30–23:30</dd>
+        <dt>Domingo</dt><dd>13:00–16:00</dd>
+        <dt>Lunes</dt><dd>Cerrado</dd>
+      </dl>
+      <p style="margin-top:16px;color:var(--gris)">Rúa ficticia, 3 · Ciudad Vieja, A Coruña</p>
+    </div>
+    <form id="f" novalidate>
+      <label>Día<input type="date" name="dia" id="dia" required></label>
+      <label>Hora
+        <select name="hora"><option>13:30</option><option>14:00</option><option>14:30</option><option>15:00</option><option>20:30</option><option>21:00</option><option>21:30</option><option>22:00</option></select>
+      </label>
+      <label>Personas<select name="personas" id="personas"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label>
+      <label>Teléfono<input type="tel" name="tel" autocomplete="tel"></label>
+      <label class="full">Nombre<input name="nombre" autocomplete="name"></label>
+      <button class="btn full" type="submit">Confirmar reserva</button>
+      <p class="ok" id="ok" role="status" hidden></p>
+    </form>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>Salitre (restaurante ficticio)</span><span>Web de muestra diseñada por Noel Villarabide</span></div></footer>
+
+<script>
+  // Pestañas de la carta
+  const tabs=[...document.querySelectorAll('[role=tab]')];
+  function activar(t){
+    tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);x.tabIndex=on?0:-1;document.getElementById(x.getAttribute('aria-controls')).hidden=!on;});
+    t.focus();
+  }
+  tabs.forEach((t,i)=>{
+    t.addEventListener('click',()=>activar(t));
+    t.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight')activar(tabs[(i+1)%tabs.length]);
+      if(e.key==='ArrowLeft')activar(tabs[(i-1+tabs.length)%tabs.length]);
+    });
+  });
+  // Reserva (demo)
+  const dia=document.getElementById('dia');
+  const hoy=new Date();hoy.setMinutes(hoy.getMinutes()-hoy.getTimezoneOffset());
+  dia.min=hoy.toISOString().slice(0,10);dia.value=dia.min;
+  document.getElementById('f').addEventListener('submit',e=>{
+    e.preventDefault();
+    const f=e.target, fecha=new Date(f.dia.value+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+    const ok=document.getElementById('ok');
+    ok.textContent=`Mesa para ${f.personas.value} el ${fecha} a las ${f.hora.value}. En la web real, el restaurante recibiría la reserva y te enviaría la confirmación.`;
+    ok.hidden=false;
+  });
+</script>
+</body>
+</html>
