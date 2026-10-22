@@ -282,6 +282,9 @@
     if (pick < 0) { S.ripple = {x: p.x, y: p.y, t: performance.now()}; return; }
     S.pendingTap = e.timeStamp || performance.now();
     choose(pick);
+    // draw the new state right away so it lands in the very next composited frame,
+    // instead of waiting for the rAF callback (which may already have run this frame)
+    const t = performance.now(); update(t); render(t);
   }, {passive: false});
 
   ['touchstart','touchmove','gesturestart','dblclick','contextmenu'].forEach(ev =>
