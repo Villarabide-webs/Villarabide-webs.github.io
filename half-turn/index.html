@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0d3b23">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Half-Turn · Decision Trainer</title>
+<meta name="description" content="Scan before you receive, decide before they press. A tiny browser game that trains passing decisions.">
+<style>
+  :root{--bg:#0b2e1c;--ink:#f4f7f2;--muted:#b9cdbf;--accent:#ffd54a;--blue:#3d7bff;--red:#ff5a45;--ok:#3ddc84;--bad:#ff5a45}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;overscroll-behavior:none}
+  #wrap{position:fixed;inset:0;display:flex;justify-content:center}
+  #game{display:block;width:100%;max-width:560px;height:100%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+  .overlay{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(6,24,14,.78);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);touch-action:none}
+  .overlay[hidden]{display:none}
+  .card{max-width:380px;width:100%;text-align:center}
+  .logo{font-size:44px;font-weight:900;letter-spacing:-1.5px;line-height:1;margin:0}
+  .logo span{color:var(--accent)}
+  .tag{color:var(--muted);margin:10px 0 22px;font-size:16px;line-height:1.4}
+  .how{list-style:none;padding:0;margin:0 0 24px;text-align:left;font-size:15px;line-height:1.45;color:var(--ink)}
+  .how li{display:flex;gap:10px;margin:8px 0}
+  .how b{color:var(--accent);min-width:22px}
+  button.big{appearance:none;border:0;border-radius:999px;background:var(--accent);color:#1a1a1a;font-weight:800;font-size:19px;padding:16px 34px;min-width:200px;touch-action:manipulation}
+  button.big:active{transform:scale(.97)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0 24px}
+  .stat{background:rgba(255,255,255,.07);border-radius:14px;padding:12px 8px}
+  .stat .v{font-size:26px;font-weight:800}
+  .stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .small{font-size:12px;color:var(--muted);margin-top:16px}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="game" aria-label="Half-Turn game pitch"></canvas></div>
+
+<div class="overlay" id="start">
+  <div class="card">
+    <h1 class="logo">Half<span>-</span>Turn</h1>
+    <p class="tag">Scan before you receive.<br>Decide before they press.</p>
+    <ul class="how">
+      <li><b>1</b><span>The ball is played to you. Use that moment to <strong>scan</strong> the pitch.</span></li>
+      <li><b>2</b><span>When it arrives, <strong>tap the teammate</strong> you'd pass to. Open lanes and forward progress score most.</span></li>
+      <li><b>3</b><span>Be quick. The red presser is closing you down.</span></li>
+    </ul>
+    <button class="big" id="play">Play</button>
+    <p class="small">10 situations · works best on a phone</p>
+  </div>
+</div>
+
+<div class="overlay" id="end" hidden>
+  <div class="card">
+    <h2 class="logo" style="font-size:34px">Full time</h2>
+    <div class="stats">
+      <div class="stat"><div class="v" id="sScore">0</div><div class="k">Score</div></div>
+      <div class="stat"><div class="v" id="sAcc">0%</div><div class="k">Safe passes</div></div>
+      <div class="stat"><div class="v" id="sBest">0</div><div class="k">Best choices</div></div>
+      <div class="stat"><div class="v" id="sTime">0</div><div class="k">Avg decision</div></div>
+    </div>
+    <p class="tag" id="sMsg" style="margin-top:0"></p>
+    <button class="big" id="again">Play again</button>
+    <p class="small" id="sRecord"></p>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  // ---------- constants ----------
+  const FIELD_W = 68, VIEW_H = 72;          // world units = metres
+  const X0 = 9, VIEW_W = 50;                // visible slice of the pitch (portrait-friendly)
+  const R = 1.55;                           // player radius in metres
+  const ROUNDS = 10;
+  const DECIDE_MS = 2600;                   // time window once the ball arrives
+  const SCAN_MS = 1100;                     // ball travelling to you
+  const BALL_SPEED = 34;                    // m/s
+  const LANE_CLEAR = 2.6;                   // defender closer than this to a lane = blocked
+  const MARK_DIST = 3.2;                    // defender closer than this to receiver = marked
+  const TAP_RADIUS = 9;                     // generous touch target, metres
+
+  const COLORS = {
+    grassA:'#1f7a43', grassB:'#1b6f3c', line:'rgba(255,255,255,.75)',
+    you:'#ffffff', team:'#3d7bff', opp:'#ff5a45', ball:'#ffffff',
+    ok:'#3ddc84', bad:'#ff5a45', accent:'#ffd54a', text:'#f4f7f2'
+  };
+
+  // ---------- canvas setup (DPR capped at 2 for steady 60fps) ----------
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', {alpha:false});
+  const fieldLayer = document.createElement('canvas');
+  const fctx = fieldLayer.getContext('2d');
+  let dpr = 1, cssW = 0, cssH = 0, scale = 1, offX = 0, offY = 0, hudH = 64, cardBelow = false;
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = canvas.getBoundingClientRect();
+    cssW = r.width; cssH = r.height;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    hudH = 64;
+    const availH = cssH - hudH - 8;
+    scale = Math.min(cssW / VIEW_W, availH / VIEW_H);
+    offX = (cssW - VIEW_W * scale) / 2;
+    const spare = availH - VIEW_H * scale;
+    cardBelow = spare >= 100;              // result card goes under the pitch when there is room
+    offY = hudH + 4 + (cardBelow ? Math.max(0, (spare - 100) / 2) : spare / 2);
+    drawField();
+  }
+
+  const sx = x => offX + (x - X0) * scale;
+  const sy = y => offY + y * scale;
+
+  // Static pitch is rendered once to an offscreen layer and blitted each frame.
+  function drawField() {
+    fieldLayer.width = canvas.width; fieldLayer.height = canvas.height;
+    const c = fctx;
+    c.setTransform(dpr,0,0,dpr,0,0);
+    c.fillStyle = '#0b2e1c'; c.fillRect(0,0,cssW,cssH);
+    const stripe = 6;
+    c.save(); c.beginPath(); c.rect(sx(X0), sy(0) - scale*2, VIEW_W*scale, VIEW_H*scale + scale*2); c.clip();
+    for (let y = 0, i = 0; y < VIEW_H; y += stripe, i++) {
+      c.fillStyle = i % 2 ? COLORS.grassA : COLORS.grassB;
+      c.fillRect(sx(X0), sy(y), VIEW_W*scale, Math.min(stripe, VIEW_H-y)*scale + 0.5);
+    }
+    c.strokeStyle = COLORS.line; c.lineWidth = Math.max(1.5, scale*0.18);
+    c.strokeRect(sx(0), sy(0), FIELD_W*scale, VIEW_H*scale);
+    // penalty box, 6-yard box, goal, arc
+    c.strokeRect(sx(13.84), sy(0), 40.32*scale, 16.5*scale);
+    c.strokeRect(sx(24.84), sy(0), 18.32*scale, 5.5*scale);
+    c.beginPath(); c.arc(sx(34), sy(11), 9.15*scale, 0.2*Math.PI, 0.8*Math.PI); c.stroke();
+    c.fillStyle = COLORS.line; c.beginPath(); c.arc(sx(34), sy(11), Math.max(1.5,scale*.25), 0, Math.PI*2); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.9)'; c.fillRect(sx(30.34), sy(0)-scale*1.6, 7.32*scale, scale*1.6);
+    // halfway line + centre circle near bottom edge
+    c.beginPath(); c.moveTo(sx(0), sy(52.5)); c.lineTo(sx(FIELD_W), sy(52.5)); c.stroke();
+    c.beginPath(); c.arc(sx(34), sy(52.5), 9.15*scale, 0, Math.PI*2); c.stroke();
+    c.restore();
+  }
+
+  // ---------- audio (unlocked on first touch) ----------
+  let actx = null;
+  function unlockAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+    try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+  }
+  function kick() {
+    if (!actx) return;
+    const t = actx.currentTime, o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    o.connect(g).connect(actx.destination); o.start(t); o.stop(t + 0.16);
+  }
+  function tone(good) {
+    if (!actx) return;
+    const t = actx.currentTime;
+    (good ? [660, 880] : [300, 220]).forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = good ? 'triangle' : 'square'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t + i*0.09); g.gain.exponentialRampToValueAtTime(good ? 0.25 : 0.12, t + i*0.09 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i*0.09 + 0.14);
+      o.connect(g).connect(actx.destination); o.start(t + i*0.09); o.stop(t + i*0.09 + 0.16);
+    });
+  }
+  const buzz = ms => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+
+  // ---------- geometry ----------
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  function segDist(p, a, b) {
+    const vx = b.x - a.x, vy = b.y - a.y, len2 = vx*vx + vy*vy || 1;
+    let t = ((p.x - a.x)*vx + (p.y - a.y)*vy) / len2;
+    t = Math.max(0, Math.min(1, t));
+    return {d: Math.hypot(p.x - (a.x + t*vx), p.y - (a.y + t*vy)), t};
+  }
+
+  // ---------- scenario generation ----------
+  function evaluate(you, mates, opps) {
+    return mates.map(m => {
+      let blocker = null, bestT = 2;
+      for (const o of opps) {
+        if (o.presser) continue;
+        const {d, t} = segDist(o, you, m);
+        if (d < LANE_CLEAR && t > 0.08 && t < 0.97 && t < bestT) { blocker = o; bestT = t; }
+      }
+      let marker = null;
+      if (!blocker) for (const o of opps) if (!o.presser && dist(o, m) < MARK_DIST) { marker = o; break; }
+      const progress = you.y - m.y;               // positive = forward
+      return {safe: !blocker && !marker, blocker, marker, blockT: bestT, progress};
+    });
+  }
+
+  function makeScenario() {
+    for (let attempt = 0; attempt < 200; attempt++) {
+      const you = {x: rand(27, 41), y: rand(55, 61)};
+      const passer = {x: you.x + rand(-14, 14), y: VIEW_H + 4};
+      const mates = [];
+      while (mates.length < 4) {
+        const m = {x: rand(X0 + 4, X0 + VIEW_W - 4), y: rand(12, 49)};
+        if (dist(m, you) < 12) continue;
+        if (mates.some(o => dist(o, m) < 11)) continue;
+        mates.push(m);
+      }
+      // two lanes get cut, one receiver gets marked, the rest stay open
+      const order = [0,1,2,3].sort(() => Math.random() - 0.5);
+      const opps = [];
+      for (const i of order.slice(0, 2)) {
+        const m = mates[i], t = rand(0.38, 0.72);
+        const nx = -(m.y - you.y), ny = m.x - you.x, nl = Math.hypot(nx, ny);
+        const off = rand(-1, 1);
+        opps.push({x: you.x + (m.x - you.x)*t + nx/nl*off, y: you.y + (m.y - you.y)*t + ny/nl*off});
+      }
+      { const m = mates[order[2]], a = rand(0, Math.PI*2);
+        opps.push({x: m.x + Math.cos(a)*1.8, y: m.y + Math.sin(a)*1.8 - 0.8}); }
+      // a free defender somewhere that doesn't cut the open lane
+      for (let k = 0; k < 30; k++) {
+        const o = {x: rand(X0 + 4, X0 + VIEW_W - 4), y: rand(8, 46)};
+        if (opps.some(p => dist(p, o) < 7) || mates.some(m => dist(m, o) < 5)) continue;
+        const open = mates[order[3]];
+        if (segDist(o, you, open).d < LANE_CLEAR + 2) continue;
+        opps.push(o); break;
+      }
+      // the presser starts behind/beside you
+      const pa = rand(-0.9, 0.9) + Math.PI/2;
+      const presser = {x: you.x + Math.cos(pa)*10, y: you.y + Math.sin(pa)*8, presser: true};
+      opps.push(presser);
+
+      const ev = evaluate(you, mates, opps);
+      const safe = ev.filter(e => e.safe);
+      if (safe.length < 1 || safe.length > 2) continue;
+      let best = -1, bestP = -1e9;
+      ev.forEach((e, i) => { if (e.safe && e.progress > bestP) { bestP = e.progress; best = i; } });
+      return {you, passer, mates, opps, presser, ev, best};
+    }
+    return null;
+  }
+
+  // ---------- game state ----------
+  const S = {
+    phase: 'idle',            // idle | scan | decide | pass | result | done
+    round: 0, score: 0, streak: 0,
+    sc: null, t0: 0, decideStart: 0,
+    ball: {x: 0, y: 0}, from: null, to: null, travel: 0, travelT: 0,
+    choice: -1, outcome: null, decisionMs: 0, points: 0,
+    log: [],
+    lag: [], fps: 60, lastFrame: 0, pendingTap: 0,
+    ripple: null
+  };
+
+  function newRound() {
+    S.round++;
+    S.sc = makeScenario();
+    S.phase = 'scan';
+    S.t0 = performance.now();
+    S.choice = -1; S.outcome = null; S.points = 0; S.ripple = null;
+    S.from = {...S.sc.passer}; S.to = {x: S.sc.you.x, y: S.sc.you.y - (R + 0.6)};
+    S.ball = {...S.from};
+    S.travel = dist(S.from, S.to); S.travelT = SCAN_MS;
+    S.presserStart = {x: S.sc.presser.x, y: S.sc.presser.y};
+  }
+
+  function startGame() {
+    unlockAudio();
+    S.round = 0; S.score = 0; S.streak = 0; S.log = [];
+    hide('start'); hide('end');
+    newRound();
+  }
+
+  // ---------- input: pointerdown, resolved immediately (no click delay) ----------
+  function toWorld(e) {
+    const r = canvas.getBoundingClientRect();
+    return {x: (e.clientX - r.left - offX) / scale + X0, y: (e.clientY - r.top - offY) / scale};
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    unlockAudio();
+    if (S.phase === 'result') { next(); return; }
+    if (S.phase !== 'decide') return;
+    const p = toWorld(e);
+    let pick = -1, pd = TAP_RADIUS;
+    S.sc.mates.forEach((m, i) => { const d = dist(m, p); if (d < pd) { pd = d; pick = i; } });
+    if (pick < 0) { S.ripple = {x: p.x, y: p.y, t: performance.now()}; return; }
+    S.pendingTap = e.timeStamp || performance.now();
+    choose(pick);
+  }, {passive: false});
+
+  ['touchstart','touchmove','gesturestart','dblclick','contextmenu'].forEach(ev =>
+    canvas.addEventListener(ev, e => e.preventDefault(), {passive: false}));
+
+  function choose(i) {
+    const now = performance.now();
+    S.choice = i;
+    S.decisionMs = now - S.decideStart;
+    const e = S.sc.ev[i], m = S.sc.mates[i];
+    S.from = {...S.ball};
+    if (e.blocker) {
+      const t = e.blockT;
+      S.to = {x: S.from.x + (m.x - S.from.x)*t, y: S.from.y + (m.y - S.from.y)*t};
+      S.outcome = 'blocked';
+    } else if (e.marker) {
+      S.to = {x: e.marker.x, y: e.marker.y}; S.outcome = 'marked';
+    } else {
+      S.to = {...m}; S.outcome = i === S.sc.best ? 'best' : 'good';
+    }
+    S.ball = {...S.from};
+    S.travel = dist(S.from, S.to); S.travelT = S.travel / BALL_SPEED * 1000;
+    S.t0 = now;
+    S.phase = 'pass';
+    kick(); buzz(12);
+  }
+
+  function timeout() {
+    S.choice = -1; S.outcome = 'late'; S.decisionMs = DECIDE_MS;
+    finishRound();
+  }
+
+  function finishRound() {
+    const speedBonus = Math.round(Math.max(0, 1 - S.decisionMs / DECIDE_MS) * 50);
+    S.points = S.outcome === 'best' ? 100 + speedBonus : S.outcome === 'good' ? 50 + Math.round(speedBonus/2) : 0;
+    const good = S.outcome === 'best' || S.outcome === 'good';
+    S.streak = good ? S.streak + 1 : 0;
+    S.score += S.points;
+    S.log.push({outcome: S.outcome, ms: S.decisionMs});
+    S.phase = 'result'; S.t0 = performance.now();
+    tone(good); if (!good) buzz([30, 40, 30]);
+  }
+
+  function next() {
+    if (S.round >= ROUNDS) return endGame();
+    newRound();
+  }
+
+  function endGame() {
+    S.phase = 'done';
+    const safe = S.log.filter(l => l.outcome === 'best' || l.outcome === 'good').length;
+    const best = S.log.filter(l => l.outcome === 'best').length;
+    const decided = S.log.filter(l => l.outcome !== 'late');
+    const avg = decided.length ? decided.reduce((a, l) => a + l.ms, 0) / decided.length : 0;
+    document.getElementById('sScore').textContent = S.score;
+    document.getElementById('sAcc').textContent = Math.round(safe / ROUNDS * 100) + '%';
+    document.getElementById('sBest').textContent = best + '/' + ROUNDS;
+    document.getElementById('sTime').textContent = avg ? (avg/1000).toFixed(2) + 's' : '–';
+    document.getElementById('sMsg').textContent =
+      best >= 8 ? 'Elite scanning. You saw the forward pass before the ball arrived.' :
+      safe >= 7 ? 'Solid. Now look for the more progressive option.' :
+      'Scan earlier: check the lanes while the ball is still travelling to you.';
+    let rec = 0; try { rec = +localStorage.getItem('halfturn.best') || 0; if (S.score > rec) localStorage.setItem('halfturn.best', S.score); } catch (e) {}
+    document.getElementById('sRecord').textContent = S.score > rec ? 'New personal best!' : rec ? 'Personal best: ' + rec : '';
+    show('end');
+  }
+
+  const show = id => { document.getElementById(id).hidden = false; };
+  const hide = id => { document.getElementById(id).hidden = true; };
+  document.getElementById('play').addEventListener('pointerdown', e => { e.preventDefault(); startGame(); });
+  document.getElementById('again').addEventListener('pointerdown', e => { e.preventDefault(); startGame(); });
+
+  // ---------- update ----------
+  function update(now) {
+    if (!S.sc) return;
+    const el = now - S.t0;
+    if (S.phase === 'scan') {
+      const k = Math.min(1, el / S.travelT);
+      const e = 1 - Math.pow(1 - k, 2);
+      S.ball.x = S.from.x + (S.to.x - S.from.x)*e;
+      S.ball.y = S.from.y + (S.to.y - S.from.y)*e;
+      if (k >= 1) { S.phase = 'decide'; S.decideStart = now; S.t0 = now; }
+    } else if (S.phase === 'decide') {
+      // presser closes in over the decision window
+      const k = Math.min(1, el / DECIDE_MS);
+      const you = S.sc.you, p = S.sc.presser, st = S.presserStart;
+      const ang = Math.atan2(st.y - you.y, st.x - you.x);
+      const r = dist(st, you) * (1 - k) + 1.4 * k;
+      p.x = you.x + Math.cos(ang) * r; p.y = you.y + Math.sin(ang) * r;
+      if (k >= 1) timeout();
+    } else if (S.phase === 'pass') {
+      const k = Math.min(1, el / Math.max(1, S.travelT));
+      S.ball.x = S.from.x + (S.to.x - S.from.x)*k;
+      S.ball.y = S.from.y + (S.to.y - S.from.y)*k;
+      if (k >= 1) finishRound();
+    } else if (S.phase === 'result') {
+      if (el > 2600) next();
+    }
+  }
+
+  // ---------- render ----------
+  function circle(x, y, r, fill, stroke, lw) {
+    ctx.beginPath(); ctx.arc(sx(x), sy(y), r*scale, 0, Math.PI*2);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.lineWidth = lw || 2; ctx.strokeStyle = stroke; ctx.stroke(); }
+  }
+  function player(x, y, color, ring, label) {
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.beginPath(); ctx.ellipse(sx(x)+scale*.3, sy(y)+scale*.55, scale*R, scale*R*.65, 0, 0, Math.PI*2); ctx.fill();
+    circle(x, y, R, color, ring || 'rgba(0,0,0,.35)', Math.max(1.5, scale*.22));
+    if (label) {
+      ctx.fillStyle = color === COLORS.you ? '#123' : '#fff';
+      ctx.font = `800 ${Math.round(scale*R*1.05)}px system-ui,sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, sx(x), sy(y)+0.5);
+    }
+  }
+  function lane(a, b, color, dashed, w) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = w || Math.max(2, scale*.3); ctx.lineCap = 'round';
+    if (dashed) ctx.setLineDash([scale*1.2, scale*1]);
+    ctx.beginPath(); ctx.moveTo(sx(a.x), sy(a.y)); ctx.lineTo(sx(b.x), sy(b.y)); ctx.stroke();
+    ctx.restore();
+  }
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x+r, y); ctx.arcTo(x+w, y, x+w, y+h, r); ctx.arcTo(x+w, y+h, x, y+h, r);
+    ctx.arcTo(x, y+h, x, y, r); ctx.arcTo(x, y, x+w, y, r); ctx.closePath();
+  }
+
+  const OUTCOME_TEXT = {
+    best: ['Best option', 'Open lane and the most forward progress.'],
+    good: ['Safe pass', 'Keeps the ball, but a more forward option was open.'],
+    blocked: ['Intercepted', 'That passing lane was cut by a defender.'],
+    marked: ['Receiver marked', 'Tight marker on him, so the ball is lost.'],
+    late: ['Too slow', 'The presser got there first. Scan earlier.']
+  };
+
+  function render(now) {
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.drawImage(fieldLayer, 0, 0);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const sc = S.sc;
+
+    if (sc) {
+      const showLanes = S.phase === 'result';
+      if (showLanes) {
+        sc.mates.forEach((m, i) => {
+          const e = sc.ev[i];
+          lane(sc.you, m, e.safe ? (i === sc.best ? 'rgba(61,220,132,.95)' : 'rgba(61,220,132,.55)') : 'rgba(255,90,69,.55)', !e.safe);
+        });
+      }
+      if (S.phase === 'pass' && S.choice >= 0) lane(S.from, S.ball, 'rgba(255,255,255,.55)', false, Math.max(2, scale*.25));
+
+      // idle sway keeps the scene alive without changing the evaluated geometry
+      const sway = (i) => Math.sin(now/520 + i*1.7) * 0.25;
+
+      sc.opps.forEach((o, i) => {
+        if (o.presser) {
+          const pulse = 1.6 + (Math.sin(now/120)+1)*0.35;
+          if (S.phase === 'decide') circle(o.x, o.y, pulse + 0.6, null, 'rgba(255,90,69,.6)', 2);
+          player(o.x, o.y, COLORS.opp, '#fff');
+        } else player(o.x + sway(i), o.y + sway(i+3)*.6, COLORS.opp);
+      });
+
+      sc.mates.forEach((m, i) => {
+        const chosen = S.choice === i;
+        if (S.phase === 'decide') circle(m.x, m.y, R + 1.1 + Math.sin(now/260 + i)*0.15, 'rgba(61,123,255,.22)');
+        if (chosen) circle(m.x, m.y, R + 1.2, null, COLORS.accent, Math.max(2, scale*.35));
+        if (showLanes && i === sc.best) {
+          ctx.fillStyle = COLORS.accent; ctx.font = `900 ${Math.round(scale*2)}px system-ui,sans-serif`;
+          ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText('★', sx(m.x), sy(m.y - R - 0.3));
+        }
+        player(m.x, m.y, COLORS.team, null, ['7','8','9','11'][i]);
+      });
+
+      player(sc.you.x, sc.you.y, COLORS.you, COLORS.accent, '10');
+      if (S.phase === 'scan') {
+        ctx.fillStyle = 'rgba(255,255,255,.12)';
+        circle(S.from.x, Math.min(S.from.y, VIEW_H), 1.1, 'rgba(61,123,255,.5)');
+      }
+      // ball
+      ctx.fillStyle = 'rgba(0,0,0,.3)';
+      ctx.beginPath(); ctx.ellipse(sx(S.ball.x)+scale*.2, sy(S.ball.y)+scale*.35, scale*.55, scale*.32, 0, 0, Math.PI*2); ctx.fill();
+      circle(S.ball.x, S.ball.y, 0.75, COLORS.ball, '#222', 1.2);
+
+      if (S.ripple) {
+        const k = (now - S.ripple.t) / 400;
+        if (k < 1) circle(S.ripple.x, S.ripple.y, 1 + k*3, null, `rgba(255,255,255,${1-k})`, 2); else S.ripple = null;
+      }
+    }
+
+    drawHud(now);
+  }
+
+  function drawHud(now) {
+    ctx.fillStyle = 'rgba(6,24,14,.9)';
+    ctx.fillRect(0, 0, cssW, hudH);
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = COLORS.text;
+    ctx.font = '800 18px system-ui,sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText(`${Math.max(S.round,1)}/${ROUNDS}`, 16, 24);
+    ctx.font = '600 12px system-ui,sans-serif'; ctx.fillStyle = '#b9cdbf';
+    ctx.fillText('SITUATION', 16, 44);
+    ctx.textAlign = 'center'; ctx.fillStyle = COLORS.text;
+    ctx.font = '900 24px system-ui,sans-serif';
+    ctx.fillText(S.score, cssW/2, 24);
+    ctx.font = '600 12px system-ui,sans-serif'; ctx.fillStyle = '#b9cdbf';
+    ctx.fillText(S.streak > 1 ? `STREAK ×${S.streak}` : 'SCORE', cssW/2, 44);
+    ctx.textAlign = 'right';
+    const avgLag = S.lag.length ? S.lag.reduce((a,b)=>a+b,0)/S.lag.length : 0;
+    ctx.fillStyle = '#b9cdbf'; ctx.font = '600 11px ui-monospace,Menlo,monospace';
+    ctx.fillText(`${Math.round(S.fps)} fps`, cssW-16, 22);
+    ctx.fillText(avgLag ? `tap→frame ${avgLag.toFixed(0)}ms` : 'tap→frame –', cssW-16, 40);
+
+    // phase banner + timer
+    const sc = S.sc;
+    if (!sc) return;
+    const bannerY = offY + 10;
+    if (S.phase === 'scan' || S.phase === 'decide') {
+      const label = S.phase === 'scan' ? 'SCAN…' : 'DECIDE';
+      ctx.font = '900 15px system-ui,sans-serif'; ctx.textAlign = 'center';
+      const w = 96, x = cssW/2 - w/2;
+      ctx.fillStyle = S.phase === 'scan' ? 'rgba(0,0,0,.45)' : COLORS.accent;
+      roundRect(x, bannerY, w, 28, 14); ctx.fill();
+      ctx.fillStyle = S.phase === 'scan' ? '#fff' : '#1a1a1a';
+      ctx.fillText(label, cssW/2, bannerY + 14.5);
+      if (S.phase === 'decide') {
+        const k = Math.min(1, (now - S.decideStart) / DECIDE_MS);
+        const bw = Math.min(260, cssW - 64), bx = cssW/2 - bw/2, by = bannerY + 36;
+        ctx.fillStyle = 'rgba(0,0,0,.4)'; roundRect(bx, by, bw, 6, 3); ctx.fill();
+        ctx.fillStyle = k > .7 ? COLORS.bad : COLORS.accent; roundRect(bx, by, bw*(1-k), 6, 3); ctx.fill();
+      }
+    } else if (S.phase === 'result' && S.outcome) {
+      const [title, sub] = OUTCOME_TEXT[S.outcome];
+      const good = S.outcome === 'best' || S.outcome === 'good';
+      const w = Math.min(cssW - 32, 360), x = cssW/2 - w/2, y = cardBelow ? sy(VIEW_H) + 8 : offY + 8;
+      ctx.fillStyle = 'rgba(6,24,14,.92)'; roundRect(x, y, w, 84, 16); ctx.fill();
+      ctx.fillStyle = good ? COLORS.ok : COLORS.bad; roundRect(x, y, 6, 84, 3); ctx.fill();
+      ctx.textAlign = 'left'; ctx.fillStyle = good ? COLORS.ok : COLORS.bad;
+      ctx.font = '900 19px system-ui,sans-serif'; ctx.fillText(title, x + 20, y + 24);
+      ctx.textAlign = 'right'; ctx.fillStyle = COLORS.accent;
+      ctx.fillText(S.points ? `+${S.points}` : '0', x + w - 16, y + 24);
+      ctx.textAlign = 'left'; ctx.fillStyle = COLORS.text; ctx.font = '500 14px system-ui,sans-serif';
+      wrap(sub, x + 20, y + 48, w - 36, 18);
+      ctx.fillStyle = '#b9cdbf'; ctx.font = '600 11px system-ui,sans-serif'; ctx.textAlign = 'right';
+      ctx.fillText(S.outcome === 'late' ? '' : `${(S.decisionMs/1000).toFixed(2)}s · tap to continue`, x + w - 16, y + 72);
+    }
+  }
+  function wrap(text, x, y, maxW, lh) {
+    const words = text.split(' '); let line = '';
+    for (const w of words) {
+      const t = line ? line + ' ' + w : w;
+      if (ctx.measureText(t).width > maxW && line) { ctx.fillText(line, x, y); line = w; y += lh; } else line = t;
+    }
+    ctx.fillText(line, x, y);
+  }
+
+  // ---------- single rAF loop ----------
+  function frame(now) {
+    if (S.pendingTap) {
+      S.lag.push(Math.max(0, performance.now() - S.pendingTap));
+      if (S.lag.length > 20) S.lag.shift();
+      S.pendingTap = 0;
+    }
+    if (S.lastFrame) S.fps = S.fps * 0.92 + (1000 / Math.max(1, now - S.lastFrame)) * 0.08;
+    S.lastFrame = now;
+    update(now);
+    render(now);
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('resize', resize);
+  window.addEventListener('orientationchange', () => setTimeout(resize, 100));
+  resize();
+  // a demo scene behind the start screen
+  S.sc = makeScenario(); S.ball = {x: S.sc.you.x, y: S.sc.you.y - (R + 0.6)}; S.phase = 'idle';
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
